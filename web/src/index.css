@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme: Midnight (default) */
+:root, [data-theme="midnight"] {
+  --bg-primary: #0f0e1a;
+  --bg-secondary: #1a1830;
+  --bg-tertiary: #252340;
+  --bg-hover: #2f2d50;
+  --accent-primary: #818cf8;
+  --accent-hover: #6366f1;
+  --accent-muted: #4f46e5;
+  --accent-text: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+  --border-color: #2d2b45;
+  --scrollbar-track: #1a1830;
+  --scrollbar-thumb: #4f46e5;
+  --range-track: #252340;
+  --range-thumb: #818cf8;
+}
+
+/* Theme: Hacker */
+[data-theme="hacker"] {
+  --bg-primary: #0a0a0a;
+  --bg-secondary: #111111;
+  --bg-tertiary: #1a1a1a;
+  --bg-hover: #222222;
+  --accent-primary: #39ff85;
+  --accent-hover: #2dd870;
+  --accent-muted: #20b858;
+  --accent-text: #000000;
+  --text-primary: #d4d4d4;
+  --text-secondary: #7a7a7a;
+  --text-muted: #4a4a4a;
+  --border-color: #1e1e1e;
+  --scrollbar-track: #111111;
+  --scrollbar-thumb: #39ff85;
+  --range-track: #1a1a1a;
+  --range-thumb: #39ff85;
+}
+
+/* Hacker mode background effect */
+[data-theme="hacker"] body {
+  background-color: #0a0a0a;
+  background-image:
+    /* Subtle grid */
+    linear-gradient(rgba(57, 255, 133, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(57, 255, 133, 0.03) 1px, transparent 1px),
+    /* Scanlines */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(57, 255, 133, 0.012) 2px,
+      rgba(57, 255, 133, 0.012) 4px
+    ),
+    /* Corner glows */
+    radial-gradient(ellipse at 0% 0%, rgba(57, 255, 133, 0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 100% 100%, rgba(57, 255, 133, 0.04) 0%, transparent 40%);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+/* Seek bar styling */
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type='range']::-webkit-slider-track {
+  height: 4px;
+  background: var(--range-track);
+  border-radius: 2px;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background: var(--range-thumb);
+  margin-top: -5px;
+}
+
+input[type='range']::-moz-range-track {
+  height: 4px;
+  background: var(--range-track);
+  border-radius: 2px;
+}
+
+input[type='range']::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
+  background: var(--range-thumb);
+  border: none;
+}

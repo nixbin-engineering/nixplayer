@@ -1,0 +1,200 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(uuid())
+  username     String          @unique
+  passwordHash String
+  isAdmin      Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  sessions     Session[]
+  tags         Tag[]
+  playlists    Playlist[]
+  smartPlaylists SmartPlaylist[]
+  queueItems   QueueItem[]
+  playbackState PlaybackState?
+  folderAccess UserFolderAccess[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+model Folder {
+  id       String   @id @default(uuid())
+  path     String   @unique
+  name     String
+  parentId String?
+  parent   Folder?  @relation("FolderTree", fields: [parentId], references: [id])
+  children Folder[] @relation("FolderTree")
+  tracks   Track[]
+  userAccess UserFolderAccess[]
+
+  @@index([parentId])
+}
+
+model Artist {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  albums Album[]
+  tracks Track[]
+}
+
+model Album {
+  id       String  @id @default(uuid())
+  name     String
+  artistId String?
+  year     Int?
+  artist   Artist? @relation(fields: [artistId], references: [id])
+  tracks   Track[]
+  coverPath String?
+
+  @@unique([name, artistId])
+  @@index([artistId])
+}
+
+model Track {
+  id         String    @id @default(uuid())
+  filePath   String    @unique
+  fileName   String
+  fileHash   String?
+  title      String
+  trackNo    Int?
+  discNo     Int?
+  duration   Float?
+  bitrate    Int?
+  sampleRate Int?
+  format     String?
+  fileSize   BigInt
+  mtime      DateTime
+  folderId   String
+  artistId   String?
+  albumId    String?
+  coverPath  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  folder     Folder    @relation(fields: [folderId], references: [id])
+  artist     Artist?   @relation(fields: [artistId], references: [id])
+  album      Album?    @relation(fields: [albumId], references: [id])
+  trackTags  TrackTag[]
+  playlistTracks PlaylistTrack[]
+  queueItems QueueItem[]
+
+  @@index([folderId])
+  @@index([artistId])
+  @@index([albumId])
+  @@index([fileSize, mtime])
+  @@index([title])
+  @@index([fileHash])
+}
+
+model Tag {
+  id        String     @id @default(uuid())
+  name      String
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackTags TrackTag[]
+
+  @@unique([name, userId])
+  @@index([userId])
+}
+
+model TrackTag {
+  id      String @id @default(uuid())
+  trackId String
+  tagId   String
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  tag     Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([trackId, tagId])
+}
+
+model Playlist {
+  id        String          @id @default(uuid())
+  name      String
+  userId    String
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tracks    PlaylistTrack[]
+
+  @@index([userId])
+}
+
+model PlaylistTrack {
+  id         String   @id @default(uuid())
+  playlistId String
+  trackId    String
+  position   Int
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, position])
+  @@index([playlistId])
+}
+
+model SmartPlaylist {
+  id        String   @id @default(uuid())
+  name      String
+  userId    String
+  rules     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model QueueItem {
+  id       String @id @default(uuid())
+  userId   String
+  trackId  String
+  position Int
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track    Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, position])
+  @@index([userId])
+}
+
+model PlaybackState {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  currentTrackId String?
+  position       Float   @default(0)
+  isPlaying      Boolean @default(false)
+  updatedAt      DateTime @updatedAt
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserFolderAccess {
+  id       String @id @default(uuid())
+  userId   String
+  folderId String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder   Folder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, folderId])
+  @@index([userId])
+}
+
+model ServerSettings {
+  key   String @id
+  value String
+}

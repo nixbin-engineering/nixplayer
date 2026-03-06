@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ntmusic}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ntmusic}
+      POSTGRES_DB: ${POSTGRES_DB:-ntmusic}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ntmusic}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+      network: host
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://ntmusic:ntmusic@postgres:5432/ntmusic}
+      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-random-secret}
+      MUSIC_PATH: /music
+      COVER_PATH: /data/covers
+      API_PORT: 3000
+    volumes:
+      - ${MUSIC_PATH:-./music}:/music:ro
+      - covers:/data/covers
+    ports:
+      - "3000:3000"
+
+  scanner:
+    build:
+      context: .
+      dockerfile: scanner/Dockerfile
+      network: host
+    depends_on:
+      api:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql://ntmusic:ntmusic@postgres:5432/ntmusic}
+      MUSIC_PATH: /music
+      COVER_PATH: /data/covers
+    volumes:
+      - ${MUSIC_PATH:-./music}:/music:ro
+      - covers:/data/covers
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      network: host
+    depends_on:
+      - api
+    ports:
+      - "8085:80"
+
+volumes:
+  pgdata:
+  covers:

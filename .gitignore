@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+*.log
+data/covers/
+api/node_modules/
+scanner/node_modules/
+web/node_modules/
+prisma/*.db
