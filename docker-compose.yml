@@ -18,6 +18,7 @@ services:
       context: .
       dockerfile: api/Dockerfile
       network: host
+    image: ghcr.io/nixbin-engineering/nixplayer-api:latest
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,6 +39,7 @@ services:
       context: .
       dockerfile: scanner/Dockerfile
       network: host
+    image: ghcr.io/nixbin-engineering/nixplayer-scanner:latest
     depends_on:
       api:
         condition: service_started
@@ -56,6 +58,7 @@ services:
       context: .
       dockerfile: web/Dockerfile
       network: host
+    image: ghcr.io/nixbin-engineering/nixplayer-web:latest
     depends_on:
       - api
     ports:
