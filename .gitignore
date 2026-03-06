@@ -8,3 +8,4 @@ scanner/node_modules/
 web/node_modules/
 prisma/*.db
 pushimage.sh
+CLAUDE.md
